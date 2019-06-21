@@ -20,7 +20,7 @@ public class CatalogController {
     }
 
     @GetMapping("/{id}")
-    public Product productById(@PathVariable Long id) {
+    public Product productById(@PathVariable String id) {
         return productService.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product not found"));
     }

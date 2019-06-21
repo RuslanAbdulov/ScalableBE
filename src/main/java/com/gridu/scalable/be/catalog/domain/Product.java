@@ -2,19 +2,22 @@ package com.gridu.scalable.be.catalog.domain;
 
 public class Product {
 
-    private Long id;
+    /*
+        uniq_id	sku	name_title	description	list_price	sale_price	category	category_tree	average_product_rating	product_url	product_image_urls	brand	total_number_reviews	Reviews
+     */
+    private String id;
     private String sku;
 
-    public Product(Long id, String sku) {
+    public Product(String id, String sku) {
         this.id = id;
         this.sku = sku;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
