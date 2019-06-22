@@ -1,63 +1,60 @@
 package com.gridu.scalable.be.catalog.repository;
 
-import com.github.skjolber.unzip.FileEntryHandler;
-import com.github.skjolber.unzip.FileEntryStreamHandler;
+import com.google.common.collect.ArrayListMultimap;
 import com.gridu.scalable.be.catalog.domain.Product;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.*;
-import java.util.concurrent.ThreadPoolExecutor;
 
 @Repository
 public class ProductRepository {
 
     private Map<String, Product> idKeyMap = new HashMap<>();
-    private Map<String, Product> skuKeyMap = new HashMap<>();
+    private ArrayListMultimap<String, Product> skuKeyMultimap = ArrayListMultimap.create();
 
     public Optional<Product> findById(String id) {
-        return Optional.ofNullable(new Product(id, "generic"));
+        return Optional.ofNullable(idKeyMap.get(id));
     }
 
     public List<Product> findBySku(String sku) {
-        List<Product> products = new ArrayList<>();
-        products.add(new Product("1", sku));
-        products.add(new Product("2", sku));
-
-        return products;
+        return skuKeyMultimap.get(sku);
     }
 
     @PostConstruct
-    public void prepareMap() {
-        FileEntryHandler handler = new FileEntryHandler() {
-            @Override
-            public void beginFileCollection(String name) {
+    void loadData() {
+        File file = new File("./src/main/resources/static/jcpenney_com-ecommerce_sample.csv");
+        try (CSVParser csvParser = CSVParser.parse(file, Charset.defaultCharset() ,CSVFormat.EXCEL.withHeader())){
+            csvParser.iterator().forEachRemaining(record -> {
+                Product product = new Product(
+                        record.get("uniq_id"),
+                        record.get("sku"),
+                        record.get("name_title"),
+                        record.get("description"),
+                        record.get("list_price"),
+                        record.get("sale_price"),
+                        record.get("category"),
+                        record.get("category_tree"),
+                        record.get("average_product_rating"),
+                        record.get("product_url"),
+                        record.get("product_image_urls"),
+                        record.get("brand"),
+                        record.get("total_number_reviews"),
+                        record.get("Reviews")
+                );
 
-            }
-
-            @Override
-            public void beginFileEntry(String name) {
-
-            }
-
-            @Override
-            public FileEntryStreamHandler getFileEntryStreamHandler(String name, long size, ThreadPoolExecutor executor) throws Exception {
-                return null;
-            }
-
-            @Override
-            public void endFileEntry(String name, ThreadPoolExecutor executor) {
-
-            }
-
-            @Override
-            public void endFileCollection(String name, ThreadPoolExecutor executor) {
-
-            }
-        };
-
-//        ZipFileEngine engine = new ZipFileEngine(handler);
-//        boolean success = engine.handle(new FileZipFileFactory(file));
+                idKeyMap.put(product.getId(), product);
+                skuKeyMultimap.put(product.getSku(), product);
+            });
+        } catch (IOException e) {
+            System.out.println("Could not parse product data, stop the application.");
+            throw new RuntimeException(e);
+        }
 
     }
 }
