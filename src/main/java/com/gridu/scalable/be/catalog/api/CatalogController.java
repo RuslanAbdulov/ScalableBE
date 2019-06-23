@@ -2,14 +2,17 @@ package com.gridu.scalable.be.catalog.api;
 
 import com.gridu.scalable.be.catalog.domain.Product;
 import com.gridu.scalable.be.catalog.manager.ProductService;
-import com.gridu.scalable.be.catalog.exception.ProductNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
+@SuppressWarnings("unchecked")
 public class CatalogController {
 
     private final ProductService productService;
@@ -20,19 +23,15 @@ public class CatalogController {
     }
 
     @GetMapping("/{id}")
-    public Product productById(@PathVariable String id) {
+    public ResponseEntity<Product> productById(@PathVariable String id) {
         return productService.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+                .map(product -> new ResponseEntity(product, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("")
-    public List<Product> productsBySku2(@RequestParam String sku) {
-        return productService.findBySku(sku);
-    }
-
-    @GetMapping("/error")
-    public String allProducts() {
-        throw new ProductNotFoundException("Product not found");
+    public ResponseEntity<List<Product>> productsBySku(@RequestParam String sku) {
+        return new ResponseEntity(productService.findBySku(sku), HttpStatus.OK);
     }
 
 }
