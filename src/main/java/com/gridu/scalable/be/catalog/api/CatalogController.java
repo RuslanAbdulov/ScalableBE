@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/catalog/products")
 @SuppressWarnings("unchecked")
 public class CatalogController {
 
