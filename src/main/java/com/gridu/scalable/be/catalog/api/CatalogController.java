@@ -23,14 +23,16 @@ public class CatalogController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> productById(@PathVariable String id) {
+    public ResponseEntity<Product> productById(@PathVariable String id) throws InterruptedException {
+        Thread.sleep((long) (Math.random() * 10000));
         return productService.findById(id)
                 .map(product -> new ResponseEntity(product, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("")
-    public ResponseEntity<List<Product>> productsBySku(@RequestParam String sku) {
+    public ResponseEntity<List<Product>> productsBySku(@RequestParam String sku) throws InterruptedException {
+        Thread.sleep((long) (Math.random() * 10000));
         return new ResponseEntity(productService.findBySku(sku), HttpStatus.OK);
     }
 
