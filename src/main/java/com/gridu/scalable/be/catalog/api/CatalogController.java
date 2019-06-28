@@ -4,6 +4,7 @@ import com.gridu.scalable.be.catalog.domain.Product;
 import com.gridu.scalable.be.catalog.manager.ProductService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,9 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 public class CatalogController {
 
+    @Value("${delay.upper.limit:1000}" )
+    private long delayLimit;
+
     private final ProductService productService;
 
     @Autowired
@@ -24,7 +28,7 @@ public class CatalogController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Product> productById(@PathVariable String id) throws InterruptedException {
-        Thread.sleep((long) (Math.random() * 2000));
+        Thread.sleep((long) (Math.random() * delayLimit));
         return productService.findById(id)
                 .map(product -> new ResponseEntity(product, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity(HttpStatus.NOT_FOUND));
@@ -32,7 +36,7 @@ public class CatalogController {
 
     @GetMapping("")
     public ResponseEntity<List<Product>> productsBySku(@RequestParam String sku) throws InterruptedException {
-        Thread.sleep((long) (Math.random() * 2000));
+        Thread.sleep((long) (Math.random() * delayLimit));
         return new ResponseEntity(productService.findBySku(sku), HttpStatus.OK);
     }
 
